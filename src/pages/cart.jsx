@@ -1,11 +1,31 @@
 // src/pages/Cart.jsx
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // 引入跳轉功能
 import useCart from '../hooks/useCart';
 import { formatCurrency } from '../utils/helpers';
 
 const CartPage = () => {
-  const { cartItems, cartCount, totalAmount, updateQuantity, removeFromCart } = useCart();
+  // 從 Hook 拿取 checkout 函式
+  const { cartItems, cartCount, totalAmount, updateQuantity, removeFromCart, checkout } = useCart();
+  const navigate = useNavigate(); 
+  
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState(null);
+
+  // 處理結帳點擊
+  const handleCheckout = async () => {
+    setIsCheckingOut(true);
+    setCheckoutError(null);
+    try {
+      await checkout(); 
+      alert("下單成功！感謝您的購買！");
+      navigate('/'); // 成功後回首頁
+    } catch (err) {
+      setCheckoutError(err.message || "結帳失敗，請稍後再試。");
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
 
   if (cartCount === 0) {
     return (
@@ -39,8 +59,23 @@ const CartPage = () => {
           ))}
         </tbody>
       </table>
-      <div className="mt-6 text-right">
-        <p className="text-2xl font-bold">總計：{formatCurrency(totalAmount)}</p>
+
+      {/* 結帳區域 */}
+      <div className="mt-8 flex flex-col items-end">
+        <div className="card w-96 bg-base-200 shadow-xl p-6">
+          <p className="text-xl mb-2">商品總數：{cartCount}</p>
+          <p className="text-2xl font-bold mb-4">總計：{formatCurrency(totalAmount)}</p>
+          
+          {checkoutError && <div className="alert alert-error mb-4"><span>{checkoutError}</span></div>}
+          
+          <button 
+            className="btn btn-primary w-full" 
+            onClick={handleCheckout}
+            disabled={isCheckingOut}
+          >
+            {isCheckingOut ? <span className="loading loading-spinner"></span> : "確認結帳"}
+          </button>
+        </div>
       </div>
     </div>
   );
