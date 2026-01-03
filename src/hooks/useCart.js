@@ -1,6 +1,7 @@
 // src/hooks/useCart.js
+// src/hooks/useCart.js
 import { useContext } from "react";
-import CartContext from "../contexts/cartContext"; // 確保檔名大小寫一致
+import CartContext from "../contexts/cartContext"; //
 
 export default function useCart() {
   const context = useContext(CartContext);
